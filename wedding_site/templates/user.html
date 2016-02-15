@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% from "bootstrap/utils.html" import icon %}
+{% from "utils.html" import render_avatar %}
+{% from "utils.html" import render_form_group %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/user.js') }}" type="text/javascript"></script>
+{% endblock %}
+
+{% block contents %}
+<div class="row header">
+    <div class="col-md-2 left">{{ render_avatar(user, 'pull-right') }}</div>
+    <div class="col-md-10 right">
+        <h1>{{ user.full_name }}&nbsp;<button class="btn btn-xs btn-link" data-toggle="modal" data-target="#edit-name-modal">{{ icon('pencil') }}</button></h1>
+    </div>
+</div>
+
+<div class="row"><div class="col-md-2"></div><div class="col-md-10">
+<table>
+    <tr>
+        <td>Email:</td>
+        <td>{{ user.email }}</td>
+    </tr>
+    <tr>
+        <td>Gender:</td>
+        <td>
+            {% if user.gender %}
+                {% if user.gender == 'male' %}&#9794;
+                {% elif user.gender == 'female' %}&#9792;
+                {% else %}&#9893;
+                {% endif %}
+                {{ user.gender | capitalize }}
+            {% else %}
+                Unknown
+            {% endif %}
+            <button class="btn btn-xs btn-link" data-toggle="modal" data-target="#gender-modal">{{ icon('pencil') }}</button>
+        </td>
+    </tr>
+    <tr>
+        <td>Invitation:</td>
+        <td>{{ render_status(user) }}</td>
+    </tr>
+    {% if user.invitation and user.invitation.total_guests > 1 %}
+        <tr>
+            <td>&nbsp;</td>
+            <td>
+                {% for u in user.invitation.users %}
+                    {% if u != user %}
+                        <a href="{{ url_for('admin.user', uid=u.uid) }}">
+                            {{ render_avatar(u, 'avatar-sm') }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                {% for i in range(user.invitation.users | length,
+                                  user.invitation.total_guests) %}
+                    <img src="{{ url_for('static', filename='images/empty_user.png') }}" alt="Empty user" class="img-circle avatar avatar-sm">
+                {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
+    <tr>
+        <td>Groups:</td>
+        <td>
+            {% if user.groups | length > 0 %}
+                {% for group in user.groups %}
+                    {% if group.special %}
+                        {% set label_class = 'info' %}
+                    {% else %}
+                        {% set label_class = 'success' %}
+                    {% endif %}
+                    <span class="label label-{{ label_class }}">
+                        <a href="{{ url_for('admin.group', group_name=group.group_name) }}">{{ group.group_display_name }}</a>
+                        <a class="btn btn-xs btn-link" href="{{ url_for('api.remove_group', uid=user.uid, gid=group.gid) }}">{{ icon('remove') }}</a>
+                    </span>
+                {% endfor %}
+            {% else %}
+                None
+            {% endif %}
+            <button class="btn btn-xs btn-link" data-toggle="modal" data-target="#group-modal">{{ icon('plus') }}</button>
+        </td>
+    </tr>
+    <tr>
+        <td>Dietary Requirements:</td>
+        <td>
+            {% if user.dietary_requirements %}
+                {{ user.dietary_requirements }}
+            {% else %}
+                None
+            {% endif %}
+            <button class="btn btn-xs btn-link" data-toggle="modal" data-target="#dietary-requirements-modal">{{ icon('pencil') }}</button>
+        </td>
+    </tr>
+</table>
+</div></div>
+{% endblock %}
+
+{% macro render_status(user) -%}
+{% if user.response_status == constants.CONFIRMED %}
+    {% set label_class = 'success' %}
+    {% set resp_text = 'Confirmed' %}
+{% elif user.response_status == constants.DECLINED %}
+    {% set label_class = 'danger' %}
+    {% set resp_text = 'Declined' %}
+{% else %}
+    {% set label_class = 'warning' %}
+    {% set resp_text = 'Invited' %}
+{% endif %}
+
+{% if user.invitation.status == constants.INVITED_DAY %}
+    {% set status = resp_text + ' day only' %}
+{% elif user.invitation.status == constants.INVITED_EVENING %}
+    {% set status = resp_text + ' evening only' %}
+{% elif user.invitation.status == constants.INVITED_BOTH %}
+    {% set status = resp_text + ' day and evening' %}
+{% else %}
+    {% set label_class = 'danger' %}
+    {% set status = 'Not invited' %}
+{% endif %}
+
+<span class="label label-{{ label_class }} status-label">{{ status }}</span>
+{%- endmacro %}
+
+{% block modals %}
+<div class="modal fade" id="edit-name-modal" tabindex="-1" role="dialog" aria-labelledby="edit-name-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="edit-name-modal-label">{{ user.full_name }}'s display name</h4>
+      </div>
+      <div class="modal-body">
+          <form action="{{ url_for('api.edit_user_name', uid=user.uid) }}" class="form" method="post" role="form" id="edit-name-form">
+              {{ edit_name_form.hidden_tag() }}
+              {{ render_form_group(edit_name_form.first_name) }}
+              {{ render_form_group(edit_name_form.last_name) }}
+              <input type="submit" class="hide-me">
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-primary" id="edit-name-modal-submit-button">Save</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="dietary-requirements-modal" tabindex="-1" role="dialog" aria-labelledby="dietary-requirements-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="dietary-requirements-modal-label">{{ user.full_name }}'s dietary requirements</h4>
+      </div>
+      <div class="modal-body">
+          <form action="{{ url_for('api.update_dietary_requirements', uid=user.uid) }}" class="form" method="post" role="form" id="update-dietary-requirements-form">
+              {{ dietary_requirements_form.hidden_tag() }}
+              {{ render_form_group(dietary_requirements_form.dietary_requirements) }}
+              <input type="submit" class="hide-me">
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-primary" id="dietary-requirements-modal-submit-button">Save</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="group-modal" tabindex="-1" role="dialog" aria-labelledby="group-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="group-modal-label">Add group</h4>
+      </div>
+      <div class="modal-body">
+          <form action="{{ url_for('api.add_group', uid=user.uid) }}" class="form" method="post" role="form" id="add-group-form">
+              {{ group_form.hidden_tag() }}
+              {{ render_form_group(group_form.group, id='group-selector-input') }}
+              {{ render_form_group(group_form.group_name, id='group-name-input') }}
+              <input type="submit" class="hide-me">
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-primary" id="group-modal-submit-button">Save</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="gender-modal" tabindex="-1" role="dialog" aria-labelledby="gender-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="gender-modal-label">{{ user.full_name }}'s gender</h4>
+      </div>
+      <div class="modal-body">
+          <form action="{{ url_for('api.update_gender', uid=user.uid) }}" class="form" method="post" role="form" id="update-gender-form">
+              {{ gender_form.hidden_tag() }}
+              {{ render_form_group(gender_form.gender, id='gender-selector-input') }}
+              {{ render_form_group(gender_form.other, id='gender-other-input') }}
+              <input type="submit" class="hide-me">
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-primary" id="gender-modal-submit-button">Save</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set active_page = 'index' %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+{% endblock %}
+
+{% block contents %}
+<div class="center">
+    <div class="vertical-spacer">&nbsp;</div>
+    <h1>Liz & Tom are getting married!</h1>
+    <div class="vertical-spacer">&nbsp;</div>
+    <h2>29th April 2017</h2>
+    <div class="vertical-spacer">&nbsp;</div>
+    <a href="{{ url_for('frontend.user') }}" class="btn btn-lg btn-primary">Tell us if you're coming!</a>
+</div>
+{% endblock %}

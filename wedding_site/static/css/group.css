@@ -1,0 +1,16 @@
+h1 {
+    margin-left: 80px;
+}
+h1 > small > button {
+    margin-left: 15px;
+    margin-top: -10px;
+}
+table {
+    font-size: 125%;
+}
+tr > td {
+    padding: 5px 10px;
+}
+tr > td:nth-child(2) {
+    width: 75%;
+}

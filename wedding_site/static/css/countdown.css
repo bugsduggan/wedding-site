@@ -1,0 +1,27 @@
+body {
+    padding-top: 40px;
+}
+
+div.image-div {
+    position: relative;
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 25px;
+    -moz-border-radius: 25px;
+    -webkit-border-radius: 25px;
+    width: 100%;
+    font-family: 'Permanent Marker', cursive;
+}
+
+div.image-div img {
+    margin-left: 18px;
+}
+
+svg {
+    position: absolute;
+    top: 255px;
+    left: 0px;
+    padding-left: 150px;
+    cursor: default;
+    opacity: 0.9;
+}

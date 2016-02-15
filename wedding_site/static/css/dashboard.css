@@ -1,0 +1,46 @@
+tr.invitation-row {
+    height: 82px;
+}
+button.add-invitation-button {
+    margin: 0px;
+    padding: 0px;
+}
+
+table tbody:nth-child(odd) {
+    background-color: #e4e4e4;
+}
+table > tbody > tr > td:nth-child(1) ,
+table > tbody > tr > td:nth-child(2) {
+    width: 55px;
+}
+
+div.owner-top {
+    display: table-cell;
+    vertical-align: middle;
+    height: 30px;
+}
+span.user-name {
+    margin-right: 10px;
+}
+div.owner-bottom > img.avatar {
+    width: 35px;
+    height: 35px;
+}
+
+button.response-button ,
+button.invitation-button {
+    width: 120px;
+}
+
+button.change-response-button ,
+button.change-invitation-button {
+    width: 32%;
+}
+button.change-response-button:disabled ,
+button.change-invitation-button:disabled {
+    background: #e4e4e4;
+}
+button.change-response-button:disabled:hover ,
+button.change-invitation-button:disabled:hover {
+    background: #ccc;
+}

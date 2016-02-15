@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set active_page = 'countdown' %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+<link href='https://fonts.googleapis.com/css?family=Permanent+Marker' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/countdown.css') }}">
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/countdown.js') }}" type="text/javascript"></script>
+{% endblock %}
+
+{% block contents %}
+<div class="center">
+    <div class="image-div">
+        <img src="{{ url_for('static', filename='images/countdown_bg.png') }}" alt="countdown plaque - 'days until we become Mr and Mrs Lakesman'"></img>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600" height="135">
+            <defs>
+                <pattern id="filler" patternUnits="userSpaceOnUse" width="1024" height="1024" >
+                <image xlink:href="{{ url_for('static', filename='images/chalk_texture.jpg') }}" x="-150" y="-150" width="1024" height="1024" preserveAspectRatio="none" />
+                </pattern>
+            </defs>
+            <text id="days" x="0" y="90%" font-size="155" fill="url(#filler)">100</text>
+        </svg>
+    </div>
+</div>
+{% endblock %}

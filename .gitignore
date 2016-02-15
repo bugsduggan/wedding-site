@@ -1,1 +1,5 @@
 .venv/
+*.pyc
+data.db
+db_repository/
+config.py

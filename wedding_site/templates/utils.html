@@ -1,0 +1,10 @@
+{% macro render_avatar(user, classes='') -%}
+<img src="{% if user.avatar_url %}{{ user.avatar_url }}{% else %}{{ url_for('static', filename='images/blank_avatar.png') }}{% endif %}" alt="{{ user.full_name }}'s avatar" class="img-circle avatar {{ classes }}" title="{{ user.email }}">
+{%- endmacro %}
+
+{% macro render_form_group(field, id='') -%}
+<div class="form-group"{% if id %} id="{{ id }}"{% endif %}>
+    <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+    {{ field(class_='form-control', **kwargs) }}
+</div>
+{%- endmacro %}

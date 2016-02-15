@@ -1,0 +1,46 @@
+{% set navigation_items = [
+    (url_for('frontend.index'), 'index', 'Home', false, false),
+    (url_for('frontend.countdown'), 'countdown', 'Countdown', false, false),
+    (url_for('frontend.user'), 'user', 'Me', true, false),
+    (url_for('admin.dashboard'), 'dashboard', 'Dashboard', true, true)
+] -%}
+
+{% from "utils.html" import render_avatar %}
+
+{% macro render_navbar(active_page) -%}
+{% set active_page = active_page | default('index') %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button aria-controls="navbar" aria-expanded="false" class="navbar-toggle collapsed" data-target="#navbar-main" data-toggle="collapse" type="button">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Wedding</a>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar-main">
+      <ul class="nav navbar-nav">
+        {% for href, id, caption, login_only, admin_only in navigation_items %}
+            {% if not login_only or (login_only and current_user.is_authenticated) %}
+                {% if not admin_only or (admin_only and current_user.is_admin()) %}
+                    <li {% if id == active_page %}class="active"{% endif %}>
+                        <a href="{{ href }}" title="{{ caption }}">{{ caption }}</a>
+                    </li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+      </ul>
+      {% if current_user.is_authenticated %}
+          <div class="logout-btn pull-right">
+              {{ render_avatar(current_user) }}
+              <a href="{{ url_for('frontend.logout') }}" class="btn-sm btn">Logout</a>
+          </div>
+      {% else %}
+          <a href="{{ url_for('frontend.oauth_authorize') }}" class="login-btn pull-right btn"></a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+{%- endmacro %}

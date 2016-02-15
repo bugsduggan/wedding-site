@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+
+{% from "utils.html" import render_avatar %}
+{% from "utils.html" import render_form_group %}
+{% from "bootstrap/utils.html" import icon %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/hoverintent.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}" type="text/javascript"></script>
+{% endblock %}
+
+{% block contents %}
+<table class="table">
+    <thead></thead>
+
+    <tbody>
+        <tr class="invitation-row">
+            <td>
+                <button class="btn btn-link add-invitation-button" data-toggle="modal" data-target="#add-user-modal" data-invitation-iid="0">
+                    <img src="{{ url_for('static', filename='images/add_user.png') }}" alt="Add user" class="img-circle avatar avatar-link">
+                </button>
+            </td>
+            <td>&nbsp;</td>
+            <td>
+                <span class="label label-primary">{{ total_users }} users in {{ invitations | length }} invitations</span>
+                <span class="label label-success">{{ total_confirmed }} confirmed</span>
+                <span class="label label-warning">{{ total_not_responded }} not responded</span>
+                <span class="label label-danger">{{ total_declined }} declined</span>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+    </tbody>
+
+    {% for invitation in invitations %}
+    <tbody>
+        <tr class="invitation-row">
+            <td>
+                <a href="{{ url_for('admin.user', uid=invitation.owner.uid) }}">
+                    {{ render_avatar(invitation.owner) }}
+                </a>
+            </td>
+            <td>&nbsp;</td>
+            <td>
+                <div class="owner-top">
+                    <span class="user-name"><strong>{{ invitation.owner.full_name }}</strong></span>
+                    {{ render_special_groups(invitation.owner) }}
+                </div>
+                <div class="owner-bottom">
+                    {% for user in invitation.users %}
+                        {% if user != invitation.owner %}
+                            {{ render_avatar(user) }}
+                        {% endif %}
+                    {% endfor %}
+                    {% for i in range(invitation.users | length,
+                                      invitation.total_guests) %}
+                        <img src="{{ url_for('static', filename='images/empty_user.png') }}" alt="Empty user" class="img-circle avatar">
+                    {% endfor %}
+                </div>
+            </td>
+            <td>
+                <a role="button" href="{{ url_for('api.decrease_invitation', iid=invitation.iid) }}" class="btn btn-xs btn-primary">{{ icon('triangle-bottom') }}</a>
+                <span class="badge bg-primary">{{ invitation.total_guests }}</span>
+                <a role="button" href="{{ url_for('api.increase_invitation', iid=invitation.iid) }}" class="btn btn-xs btn-primary">{{ icon('triangle-top') }}</a>
+            </td>
+            <td class="center">{{ render_response_status(invitation.owner) }}</td>
+            <td>&nbsp;</td>
+            <td rowspan="{{ invitation.total_guests }}" class="center">
+                {{ render_invitation_status_button(invitation) }}
+            </td>
+            <td rowspan="{{ invitation.total_guests }}" class="center">
+                <button class="btn btn-danger" data-toggle="modal" data-target="#delete-invitation-modal" data-invitation-iid="{{ invitation.iid }}">{{ icon('trash') }}</button>
+            </td>
+        </tr>
+
+        {% for user in invitation.users %}
+            {% if user != invitation.owner %}
+            <tr class="sub-guest">
+                <td>&nbsp;</td>
+                <td>
+                    <a href="{{ url_for('admin.user', uid=user.uid) }}">
+                        {{ render_avatar(user, 'avatar-sm') }}
+                    </a>
+                </td>
+                <td>
+                    <span class="user-name">{{ user.full_name }}</span>
+                    {{ render_special_groups(user) }}
+                </td>
+                <td>&nbsp;</td>
+                <td class="center">{{ render_response_status(user) }}</td>
+                <td>
+                    <button class="btn btn-xs btn-danger" data-toggle="modal" data-target="#delete-user-modal" data-user-uid="{{ user.uid }}">{{ icon('trash') }}</button>
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        {% for i in range(invitation.users | length,
+                          invitation.total_guests) %}
+            <tr class="sub-guest">
+                <td>&nbsp;</td>
+                <td>
+                    <img src="{{ url_for('static', filename='images/empty_user.png') }}" alt="Empty user" class="img-circle avatar avatar-sm">
+                </td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>
+                    <button class="btn btn-xs btn-primary" data-toggle="modal" data-target="#add-user-modal" data-invitation-iid="{{ invitation.iid }}">{{ icon('plus') }}</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    {% endfor %}
+
+</table>
+{% endblock %}
+
+{% macro render_special_groups(user) -%}
+{% set show_group_one = false %}
+
+{% if user.has_group('admins') %}
+    {% set show_group_one = true %}
+    {% set group_one_name = 'Admin' %}
+    {% set group_one_link = 'admins' %}
+{% elif user.has_group('best_men') %}
+    {% set show_group_one = true %}
+    {% set group_one_name = 'Best man' %}
+    {% set group_one_link = 'best_men' %}
+{% elif user.has_group('maids_of_honour') %}
+    {% set show_group_one = true %}
+    {% set group_one_name = 'Maid of Honour' %}
+    {% set group_one_link = 'maids_of_honour' %}
+{% elif user.has_group('groomsmen') %}
+    {% set show_group_one = true %}
+    {% set group_one_name = 'Groomsman' %}
+    {% set group_one_link = 'groomsmen' %}
+{% elif user.has_group('bridesmaids') %}
+    {% set show_group_one = true %}
+    {% set group_one_name = 'Bridesmaid' %}
+    {% set group_one_link = 'bridesmaids' %}
+{% elif user.has_group('parents') %}
+    {% set show_group_one = true %}
+    {% set group_one_name = 'Parent' %}
+    {% set group_one_link = 'parents' %}
+{% elif user.has_group('bridal_party') %}
+    {% set show_group_one = true %}
+    {% set group_one_name = 'Bridal party' %}
+    {% set group_one_link = 'bridal_party' %}
+{% endif %}
+
+{% if show_group_one %}
+    <span class="label label-info">
+        <a href="{{ url_for('admin.group', group_name=group_one_link) }}" class="no-colour">{{ group_one_name }}</a>
+    </span>
+{% endif %}
+
+{% if user.has_group('contractors') %}
+    <span class="label label-info">
+        <a href="{{ url_for('admin.group', group_name='contractors') }}" class="no-colour">Contractor</a>
+    </span>
+{% endif %}
+
+{% if user.has_group('farmhouse_guests') %}
+    <span class="label label-info">
+        <a href="{{ url_for('admin.group', group_name='farmhouse_guests') }}" class="no-colour">Farmhouse guest</a>
+    </span>
+{% endif %}
+{%- endmacro %}
+
+{% macro render_response_status(user) -%}
+{% if user.response_status == constants.DECLINED %}
+    {% set button_class = 'danger' %}
+    {% set button_status = 'Declined' %}
+{% elif user.response_status == constants.CONFIRMED %}
+    {% set button_class = 'success' %}
+    {% set button_status = 'Confirmed' %}
+{% else %}
+    {% set button_class = 'warning' %}
+    {% set button_status = 'Not responded' %}
+{% endif %}
+<button class="btn btn-{{ button_class }} response-button" data-toggle="modal" data-target="#change-response-modal" data-user-uid="{{ user.uid }}" data-user-state="{{ user.response_status }}">{{ button_status }}</button>
+{%- endmacro %}
+
+{% macro render_invitation_status_button(invitation) -%}
+{% if invitation.status == constants.INVITED_DAY %}
+    {% set button_class = 'btn-info' %}
+    {% set button_status = 'Day' %}
+{% elif invitation.status == constants.INVITED_EVENING %}
+    {% set button_class = 'btn-info' %}
+    {% set button_status = 'Evening' %}
+{% elif invitation.status == constants.INVITED_BOTH %}
+    {% set button_class = 'btn-primary' %}
+    {% set button_status = 'Both' %}
+{% else %}
+    {% set button_class = 'btn-danger' %}
+    {% set button_status = 'Uninvited' %}
+{% endif %}
+<button class="btn {{ button_class }} invitation-button" data-toggle="modal" data-target="#change-invitation-modal" data-invitation-iid="{{ invitation.iid }}" data-invitation-state="{{ invitation.status }}">{{ button_status }}</button>
+{%- endmacro %}
+
+{% block modals %}
+<div class="modal fade" id="delete-invitation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-invitation-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete-invitation-modal-label">Delete invitation?</h4>
+      </div>
+      <div class="modal-body">
+        <p><strong>Careful now!</strong></p>
+        <p>This will completely remove everyone on this invitation from the guest list. This action cannot be undone without Tom manually touching the database and he won't do that without grumbling. A lot.</p>
+        <p>You have been warned!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-danger" id="delete-invitation-modal-delete-button">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="delete-user-modal" tabindex="-1" role="dialog" aria-labelledby="delete-user-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete-user-modal-label">Delete guest?</h4>
+      </div>
+      <div class="modal-body">
+        <p><strong>Careful now!</strong></p>
+        <p>This will completely remove this guest from the guest list. This action cannot be undone without Tom manually touching the database and he won't do that without grumbling. A lot.</p>
+        <p>You have been warned!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-danger" id="delete-user-modal-delete-button">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="add-user-modal" tabindex="-1" role="dialog" aria-labelledby="add-user-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="add-user-modal-label">Add guest</h4>
+      </div>
+      <div class="modal-body">
+          <form action="{{ url_for('api.add_user') }}" class="form" method="post" role="form" id="add-user-form">
+              {{ add_user_form.hidden_tag() }}
+              {{ add_user_form.invitation_iid }}
+              {{ render_form_group(add_user_form.email) }}
+              {{ render_form_group(add_user_form.first_name) }}
+              {{ render_form_group(add_user_form.last_name) }}
+              {{ render_form_group(add_user_form.invitation_status, id="invitation-status-form-group") }}
+              {{ render_form_group(add_user_form.invitation_size, id="invitation-size-form-group", max=10, min=1) }}
+              <input type="submit" class="hide-me">
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-primary" id="add-user-modal-submit-button">Add</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="change-response-modal" tabindex="-1" role="dialog" aria-labelledby="change-response-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="change-response-modal-label">Change/update response</h4>
+      </div>
+      <div class="modal-body">
+          <button id="change-response-confirm-button" class="btn btn-success change-response-button">Confirm</button>
+          <button id="change-response-nullify-button" class="btn btn-warning change-response-button">Nullify</button>
+          <button id="change-response-decline-button" class="btn btn-danger change-response-button">Decline</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="change-invitation-modal" tabindex="-1" role="dialog" aria-labelledby="change-invitation-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="change-invitation-modal-label">Change invitation type</h4>
+      </div>
+      <div class="modal-body">
+          <p><strong>Careful now!</strong></p>
+          <p>This will affect ALL guests on this invitation</p>
+          <p>It will also reset <strong>every</strong> guest's response (if they've given one) so far.</p>
+          <p>You could <strong>lose data</strong></p>
+          <button id="change-invitation-day-button" class="btn btn-info change-invitation-button">Day only</button>
+          <button id="change-invitation-evening-button" class="btn btn-info change-invitation-button">Evening only</button>
+          <button id="change-invitation-both-button" class="btn btn-primary change-invitation-button">Day and evening</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

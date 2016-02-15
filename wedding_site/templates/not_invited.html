@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% set active_page = 'user' %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+{% endblock %}
+
+{% block contents %}
+<div class="center">
+    <div class="vertical-spacer"></div>
+    <h1>Well that's embarrassing!</h1>
+    <div class="vertical-spacer"></div>
+    <p class="lead">It looks like we don't have your invitation!</p>
+    <p class="lead">If you think that's clearly an error, get in touch with us and we'll sort it out.</p>
+</div>
+{% endblock %}

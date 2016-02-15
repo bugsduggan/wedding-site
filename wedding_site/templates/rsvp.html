@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set active_page = 'user' %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rsvp.css') }}">
+{% endblock %}
+
+{% block contents %}
+<div class="center">
+    <div class="vertical-spacer"></div>
+    {% if user.first_name %}
+        <h1>Hey there, {{ user.first_name }}!</h1>
+    {% else %}
+        <h1>Hey there!</h1>
+    {% endif %}
+    <div class="vertical-spacer"></div>
+    <p class="lead">Aren't you a lucky {{ pick_gender(user) }}, you've been invited to {{ invitation_status(user) }}.</p>
+    <div class="vertical-spacer"</div>
+    {% if user.response_status == constants.NOT_RESPONDED %}
+    <a href="{{ url_for('frontend.decline_user') }}" class="btn btn-lg btn-danger">I can't come, sorry!</a>
+    <a href="{{ url_for('frontend.confirm_user') }}" class="btn btn-lg btn-success">Count me in!</a>
+    {% elif user.response_status == constants.CONFIRMED %}
+    <p class="lead">We can't wait to see you there!</p>
+    {% elif user.response_status == constants.DECLINED %}
+    <p class="lead">We're sorry you can't make it... more cake for us!</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% macro pick_gender(user) -%}
+{% if user.gender == 'male' %}chappie{% elif user.gender == 'female' %}lady{% else %}humanoid{% endif %}
+{%- endmacro %}
+
+{% macro invitation_status(user) -%}
+{% if user.invitation.status == constants.INVITED_DAY %}the service (starting at 14:30){% elif user.invitation.status == constants.INVITED_EVENING %}the evening do (starting around 19:30){% elif user.invitation.status == constants.INVITED_BOTH %}the whole shebang (starting at 14:30){% endif %}
+{%- endmacro %}

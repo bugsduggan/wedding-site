@@ -1,0 +1,85 @@
+div.wrapper {
+    margin-top: 50px;
+}
+div.flash > div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+div.vertical-spacer {
+    height: 40px;
+}
+
+div.logout-btn {
+    margin-top: 0px;
+    width: 193px;
+    height: 48px;
+}
+a.login-btn {
+    margin-top: 0px;
+    width: 193px;
+    height: 48px;
+    background: url('/static/images/signin_button_normal.png') no-repeat;
+}
+a.login-btn:active {
+    background: url('/static/images/signin_button_pressed.png') no-repeat;
+}
+
+div.center {
+    width: 100%;
+    margin: auto;
+    text-align: center;
+}
+
+.hide-me {
+    display: none;
+}
+
+a {
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: none;
+}
+
+img.avatar {
+    width: 50px;
+    height: 50px;
+}
+img.avatar-sm {
+    width: 35px;
+    height: 35px;
+}
+img.avatar-link:hover {
+    background: #ccc;
+}
+img.avatar-link:active {
+    background: #a5a5a5;
+}
+
+span.label {
+    display: inline-block;
+}
+span.label > a:nth-child(1) {
+    color: #333;
+}
+span.label > a:nth-child(1):hover {
+    color: #23527c;
+}
+
+span.badge {
+    cursor: default;
+}
+
+table.table tbody > tr > td {
+    vertical-align: middle;
+}
+table.table tbody > tr > td.left {
+    text-align: left;
+}
+table.table tbody > tr > td.center {
+    text-align: center;
+}
+table.table tbody > tr > td.right {
+    text-align: right;
+}

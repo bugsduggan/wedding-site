@@ -1,0 +1,24 @@
+div.header {
+    margin-top: 10px;
+    margin-bottom: 25px;
+}
+div.header > div.left {
+    margin-top: 13px;
+}
+
+table {
+    font-size: 125%;
+}
+tr > td {
+    padding: 5px 10px;
+}
+
+span.label > a {
+    padding: 0px;
+}
+span.label {
+    height: 24px;
+}
+span.status-label {
+    padding-top: 5px;
+}

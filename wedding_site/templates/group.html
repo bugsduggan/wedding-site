@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% from "utils.html" import render_avatar %}
+{% from "bootstrap/utils.html" import icon %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/group.css') }}">
+{% endblock %}
+
+{% block contents %}
+<h1>
+    {{ group.group_display_name }}
+    {% if not group.special %}
+        <small><button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#group-delete-modal">{{ icon('trash') }}</button></small>
+    {% endif %}
+</h1>
+<table>
+    {% for user in group.users %}
+    <tr>
+        <td>
+            <a href="{{ url_for('admin.user', uid=user.uid) }}">
+                {{ render_avatar(user) }}
+            </a>
+        </td>
+        <td>{{ user.full_name }}</td>
+        <td>
+            <a class="btn btn-sm btn-danger" href="{{ url_for('api.remove_group', uid=user.uid, gid=group.gid) }}">
+                {{ icon('trash') }}
+            </a>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="group-delete-modal" tabindex="-1" role="dialog" aria-labelledby="group-delete-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="group-delete-modal-label">Delete {{ group.group_display_name }}?</h4>
+      </div>
+      <div class="modal-body">
+          <p><strong>Careful now!</strong></p>
+          <p>This will remove any trace that these users ever belonged to a group called {{ group.group_display_name }} as well as the group itself.</p>
+          <p>You'd better be sure of what you're doing before you do it!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a href="{{ url_for('api.delete_group', gid=group.gid) }}" role="button" class="btn btn-danger" id="group-delete-modal-delete-button">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
