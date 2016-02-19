@@ -20,6 +20,7 @@ def inject_constants():
 @admin_required
 def dashboard():
     invitations = Invitation.query.filter(Invitation.status != constants.NOT_INVITED).all()
+    invitations = sorted(invitations, key=lambda inv: inv.owner.last_name)
     add_user_form = AddUserForm()
 
     total_users = 0
