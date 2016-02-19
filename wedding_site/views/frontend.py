@@ -101,16 +101,11 @@ def oauth_callback():
         db.session.add(user)
         db.session.commit()
     else:
-        if not user.first_name or user.first_name == '':
-            user.first_name = user_data['first_name']
-        if not user.last_name or user.last_name == '':
-            user.last_name = user_data['last_name']
-        if not user.gender or user.gender == '':
-            user.gender = user_data['gender']
-        if not user.social_id or user.social_id == '':
-            user.social_id = user_data['social_id']
-        if not user.avatar_url or user.avatar_url == '':
-            user.avatar_url = user_data['avatar_url']
+        user.first_name = user_data['first_name']
+        user.last_name = user_data['last_name']
+        user.gender = user_data['gender']
+        user.social_id = user_data['social_id']
+        user.avatar_url = user_data['avatar_url']
         db.session.add(user)
         db.session.commit()
     login_user(user, True)
