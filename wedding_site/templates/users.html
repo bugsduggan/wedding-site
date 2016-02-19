@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% set active_page = 'none' %}
+
+{% from "utils.html" import render_avatar %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/users.css') }}">
+{% endblock %}
+
+{% block contents %}
+<table>
+    {% for user in users %}
+    <tr>
+        <td>{{ render_avatar(user, 'avatar-sm') }}</td>
+        <td><h4>{{ user.full_name }}</h4></td>
+        <td>{{ user.email }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

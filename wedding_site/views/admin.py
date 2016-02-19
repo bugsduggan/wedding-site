@@ -55,6 +55,13 @@ def group(group_name):
     return render_template('group.html', group=group)
 
 
+@admin.route('/users')
+@admin_required
+def users():
+    users = User.query.order_by(User.last_name).all()
+    return render_template('users.html', users=users)
+
+
 @admin.route('/user/<int:uid>')
 @admin_required
 def user(uid):
