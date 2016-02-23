@@ -3,3 +3,5 @@
 data.db
 db_repository/
 config.py
+
+.db_backup
