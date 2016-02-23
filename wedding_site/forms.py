@@ -20,6 +20,12 @@ class AddUserForm(Form):
                                              (INVITED_EVENING, 'Evening only')])
 
 
+class AddGuestForm(Form):
+    email = EmailField('Email', validators=[DataRequired()])
+    first_name = StringField('First name')
+    last_name = StringField('Last name')
+
+
 class EditNameForm(Form):
     first_name = StringField('First name', validators=[DataRequired()])
     last_name = StringField('Last name', validators=[DataRequired()])

@@ -12,7 +12,9 @@
 <script src="{{ url_for('static', filename='js/rsvp.js') }}" type="text/javascript"></script>
 {% endblock %}
 
+{% from "utils.html" import render_avatar %}
 {% from "utils.html" import render_form_group %}
+{% from "bootstrap/utils.html" import icon %}
 
 {% block contents %}
 <div class="center">
@@ -24,17 +26,54 @@
     {% endif %}
     <div class="vertical-spacer"></div>
     <p class="lead">Aren't you a lucky {{ pick_gender(user) }}, you've been invited to {{ invitation_status(user) }}.</p>
-    <div class="vertical-spacer"</div>
     {% if user.response_status == constants.NOT_RESPONDED %}
-    <a href="{{ url_for('frontend.decline_user') }}" class="btn btn-lg btn-danger">I can't come, sorry!</a>
-    <a href="{{ url_for('frontend.confirm_user') }}" class="btn btn-lg btn-success">Count me in!</a>
+        <a href="{{ url_for('frontend.decline_user') }}" class="btn btn-lg btn-danger">I can't come, sorry!</a>
+        <a href="{{ url_for('frontend.confirm_user') }}" class="btn btn-lg btn-success">Count me in!</a>
     {% elif user.response_status == constants.CONFIRMED %}
-    <p class="lead">We can't wait to see you there!</p>
+        <p class="lead">We can't wait to see you there!</p>
         {% if user.invitation.status == constants.INVITED_BOTH or user.invitation.status == constants.INVITED_DAY %}
             <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#dietary-requirements-modal">Tell us if you have any special dietary requirements</button>
         {% endif %}
+        {% if user.invitation.owner == user and user.invitation.total_guests > 1 %}
+        <div class="table-surround">
+            <p class="lead">You have invited {{ (user.invitation.users | length) -1 }} guests and may invite {{ user.invitation.total_guests -1 }} total.</p>
+            <table>
+                {% for u in user.invitation.users %}
+                    {% if u != user.invitation.owner %}
+                        <tr>
+                            <td>{{ render_avatar(u, 'avatar-sm') }}</td>
+                            <td><strong>{{ u.full_name }}</strong></td>
+                            <td>{{ u.email }}</td>
+                            <td>
+                                {% if u.response_status == constants.NOT_RESPONDED %}
+                                <span class="label label-warning">Undecided</span>
+                                {% elif u.response_status == constants.CONFIRMED %}
+                                <span class="label label-success">Coming</span>
+                                {% elif u.response_status == constants.DECLINED %}
+                                <span class="label label-danger">Declined</span>
+                                {% else %}
+                                &nbsp;
+                                {% endif %}
+                            </td>
+                            <td><button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#delete-guest-modal" data-user-uid="{{ u.uid }}" data-user-username="{{ u.full_name }}">{{ icon('trash') }}</button></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                {% for i in range(user.invitation.users | length,
+                                  user.invitation.total_guests) %}
+                    <tr>
+                        <td><img src="{{ url_for('static', filename='images/empty_user.png') }}" alt="Empty user" class="img-circle avatar avatar-sm"></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td><button data-toggle="modal" data-target="#add-user-modal" class="btn btn-sm btn-primary">{{ icon('plus') }}</button></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
     {% elif user.response_status == constants.DECLINED %}
-    <p class="lead">We're sorry you can't make it... more cake for us!</p>
+        <p class="lead">We're sorry you can't make it... more cake for us!</p>
     {% endif %}
 </div>
 {% endblock %}
@@ -65,6 +104,51 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         <a role="button" class="btn btn-primary" id="dietary-requirements-modal-submit-button">Save</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="delete-guest-modal" tabindex="-1" role="dialog" aria-labelledby="delete-guest-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete-guest-modal-label">Are you sure?</h4>
+      </div>
+      <div class="modal-body">
+          <p class="lead">Careful now!</p>
+          <p>This will remove <span id="delete-guest-modal-name"></span> entirely and there's nothing we can do about it once it's done.</p>
+          <p>Make sure you're certain!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-danger" id="delete-guest-modal-delete-button">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="add-user-modal" tabindex="-1" role="dialog" aria-labelledby="add-user-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="add-user-modal-label">Invite guest</h4>
+      </div>
+      <div class="modal-body">
+          <p class="lead">Please note, you MUST provide the email address that this person would use to login to Google. Dragons will eat you if you don't!</p>
+          <form action="{{ url_for('frontend.add_guest') }}" class="form" method="post" role="form" id="add-user-form">
+              {{ add_guest_form.hidden_tag() }}
+              {{ render_form_group(add_guest_form.email) }}
+              {{ render_form_group(add_guest_form.first_name) }}
+              {{ render_form_group(add_guest_form.last_name) }}
+              <input type="submit" class="hide-me">
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-primary" id="add-user-modal-submit-button">Invite</a>
       </div>
     </div>
   </div>
