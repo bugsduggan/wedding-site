@@ -110,7 +110,8 @@ def invitation_both(iid):
 def add_user():
     form = AddUserForm(request.form)
     if not form.validate():
-        abort(400)
+        flash('Something went wrong validating your input', 'danger')
+        return redirect(url_for('admin.dashboard'))
 
     email = form.email.data
     first_name = form.first_name.data
@@ -127,14 +128,17 @@ def add_user():
         if last_name:
             user.last_name = last_name
     if user.invitation:
-        abort(400)
+        flash('The user already has an invitation attached... somewhere', 'danger')
+        return redirect(url_for('admin.dashboard'))
 
     if invitation_iid > 0:
         invitation = Invitation.query.filter_by(iid=invitation_iid).first()
         if not invitation:
-            abort(400)
+            flash('The invitation you\'re trying to attach to cannot be found', 'danger')
+            return redirect(url_for('admin.dashboard'))
         if len(invitation.users) >= invitation.total_guests:
-            abort(400)
+            flash('That invitation is already full', 'danger')
+            return redirect(url_for('admin.dashboard'))
         invitation.users.append(user)
     else:
         invitation = Invitation(owner=user,
@@ -155,7 +159,8 @@ def delete_user(uid):
     if not user:
         abort(404)
     if user.invitation.owner == user and len(user.invitation.users) > 1:
-        abort(400)
+        flash('That invitation still has guests attached', 'danger')
+        return redirect(url_for('admin.dashboard'))
 
     if len(user.invitation.users) == 1:
         db.session.delete(user.invitation)
@@ -215,7 +220,8 @@ def edit_user_name(uid):
 
     form = EditNameForm(request.form)
     if not form.validate():
-        abort(400)
+        flash('Something went wrong validating your input', 'danger')
+        return redirect(url_for('admin.user'))
 
     first_name = form.first_name.data
     last_name = form.last_name.data
@@ -238,7 +244,8 @@ def update_gender(uid):
 
     form = GenderForm(request.form)
     if not form.validate():
-        abort(400)
+        flash('Something went wrong validating your input', 'danger')
+        return redirect(url_for('admin.user'))
 
     gender = form.gender.data
     if gender == 'other':
@@ -266,7 +273,8 @@ def add_group(uid):
     group_choices.append((-1, 'New group'))
     form.group.choices = group_choices
     if not form.validate():
-        abort(400)
+        flash('Something went wrong validating your input', 'danger')
+        return redirect(url_for('admin.user'))
 
     gid = form.group.data
     group_name = form.group_name.data.lower().replace(' ', '_')
@@ -276,7 +284,8 @@ def add_group(uid):
     else:
         group = Group.query.filter_by(gid=gid).first()
         if not group:
-            abort(400)
+            flash('Group not found', 'danger')
+            return redirect(url_for('admin.user'))
 
     user.groups.append(group)
 
@@ -316,7 +325,8 @@ def update_dietary_requirements(uid):
 
     form = DietaryRequirementsForm(request.form)
     if not form.validate():
-        abort(400)
+        flash('Something went wrong validating your input', 'danger')
+        return redirect(url_for('admin.user'))
 
     dietary_requirements = form.dietary_requirements.data
     user.dietary_requirements = dietary_requirements
