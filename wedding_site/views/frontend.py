@@ -86,12 +86,6 @@ def add_guest():
         return redirect(url_for('.user'))
     form = AddGuestForm(request.form)
     if not form.validate():
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(u"Error in the %s field - %s" % (
-                    getattr(form, field).label.text,
-                    error
-                ))
         flash('Something went wrong', 'danger')
         return redirect(url_for('.user'))
 
