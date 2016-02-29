@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% set active_page = 'todos' %}
+
+{% from "utils.html" import render_form_group %}
+{% from "bootstrap/utils.html" import icon %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/todos.css') }}">
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/todos.js') }}" type="text/javascript"></script>
+{% endblock %}
+
+{% block contents %}
+<div class="todo-buttons">
+    <button data-toggle="modal" data-target="#add-task-modal" class="btn btn-lg btn-success">New task</button>
+</div>
+
+<table class="table table-striped">
+    {% for todo in todos %}
+    {% if todo.done %}
+        {% set row_class='success' %}
+    {% elif todo.overdue %}
+        {% set row_class='danger' %}
+    {% else %}
+        {% set row_class='' %}
+    {% endif %}
+    <tr class="{{ row_class }}">
+        <td><strong>{{ todo.content }}</strong></td>
+        <td>
+            {% if todo.due_date %}
+                Due {{ momentjs(todo.due_date).fromNow() }}
+            {% endif %}
+        </td>
+        <td>
+            {% if todo.done %}
+                <a href="{{ url_for('api.undo_task', tid=todo.tid) }}" class="btn btn-sm btn-warning">Undo {{ icon('remove') }}</a>
+            {% else %}
+                <a href="{{ url_for('api.do_task', tid=todo.tid) }}" class="btn btn-sm btn-success">Done {{ icon('ok') }}</a>
+            {% endif %}
+        </td>
+        <td>
+            <button data-toggle="modal" data-target="#delete-task-modal" data-task-tid="{{ todo.tid }}" class="btn btn-sm btn-danger">Delete {{ icon('trash') }}</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="add-task-modal" tabindex="-1" role="dialog" aria-labelledby="add-task-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="add-task-modal-label">Add task</h4>
+      </div>
+      <div class="modal-body">
+          <form action="{{ url_for('api.add_task') }}" class="form" method="post" role="form" id="add-task-form">
+              {{ add_task_form.hidden_tag() }}
+              {{ render_form_group(add_task_form.content) }}
+              {{ render_form_group(add_task_form.due_date) }}
+              <input type="submit" class="hide-me">
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-primary" id="add-task-modal-submit-button">Add</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="delete-task-modal" tabindex="-1" role="dialog" aria-labelledby="delete-task-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete-task-modal-label">Delete task?</h4>
+      </div>
+      <div class="modal-body">
+        <p class="lead">Careful now!</p>
+        <p>This will permanently delete this task. Think about what you're doing!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a role="button" class="btn btn-danger" id="delete-task-modal-delete-button">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

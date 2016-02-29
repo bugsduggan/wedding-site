@@ -1,6 +1,8 @@
 from functools import wraps
+from datetime import date
 
 from flask import current_app, flash, redirect, url_for
+from flask.json import JSONEncoder
 from flask.ext.login import current_user
 
 
@@ -16,3 +18,11 @@ def admin_required(func):
             return redirect(url_for('frontend.index'))
         return func(*args, **kwargs)
     return decorated_view
+
+
+class CustomJSONEncoder(JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, date):
+            return obj.isoformat()
+        return JSONEncoder.default(self, obj)

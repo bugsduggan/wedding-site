@@ -1,7 +1,7 @@
 from flask_wtf import Form
 from wtforms import HiddenField, SelectField, StringField
-from wtforms.fields.html5 import EmailField, IntegerField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.fields.html5 import EmailField, IntegerField, DateField
+from wtforms.validators import DataRequired, NumberRange, Optional
 from wtforms.widgets import TextArea
 
 from wedding_site.models.constants import *
@@ -46,3 +46,8 @@ class GroupForm(Form):
 class DietaryRequirementsForm(Form):
     dietary_requirements = StringField('Dietary requirements',
                                        widget=TextArea())
+
+
+class AddTaskForm(Form):
+    content = StringField('Content', validators=[DataRequired()])
+    due_date = DateField('Due date', validators=[Optional()])

@@ -6,6 +6,7 @@ from wedding_site.models import *
 from wedding_site.forms import AddUserForm, EditNameForm
 from wedding_site.forms import GenderForm, GroupForm
 from wedding_site.forms import DietaryRequirementsForm
+from wedding_site.forms import AddTaskForm
 from wedding_site.utils import admin_required
 
 
@@ -349,3 +350,64 @@ def delete_group(gid):
 
     flash('%s group deleted' % group.group_display_name, 'success')
     return redirect(url_for('admin.dashboard'))
+
+
+@api.route('/add_task', methods=['POST'])
+@admin_required
+def add_task():
+    form = AddTaskForm(request.form)
+    if not form.validate():
+        flash('Something went wrong validating your input', 'danger')
+        return redirect(url_for('admin.todos'))
+
+    content = form.content.data
+    due_date = form.due_date.data
+
+    todo = Todo(content=content, due_date=due_date)
+    db.session.add(todo)
+    db.session.commit()
+
+    flash('New task created', 'success')
+    return redirect(url_for('admin.todos'))
+
+
+@api.route('/undo_task/<int:tid>')
+@admin_required
+def undo_task(tid):
+    todo = Todo.query.filter_by(tid=tid).first()
+    if not todo:
+        abort(404)
+
+    todo.done = False
+    db.session.add(todo)
+    db.session.commit()
+
+    return redirect(url_for('admin.todos'))
+
+
+@api.route('/do_task/<int:tid>')
+@admin_required
+def do_task(tid):
+    todo = Todo.query.filter_by(tid=tid).first()
+    if not todo:
+        abort(404)
+
+    todo.done = True
+    db.session.add(todo)
+    db.session.commit()
+
+    return redirect(url_for('admin.todos'))
+
+
+@api.route('/delete_task/<int:tid>')
+@admin_required
+def delete_task(tid):
+    todo = Todo.query.filter_by(tid=tid).first()
+    if not todo:
+        abort(404)
+
+    db.session.delete(todo)
+    db.session.commit()
+
+    flash('Task deleted', 'success')
+    return redirect(url_for('admin.todos'))

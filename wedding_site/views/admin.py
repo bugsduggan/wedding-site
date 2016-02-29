@@ -1,3 +1,5 @@
+from datetime import date
+
 from flask import Blueprint, render_template, abort
 
 from wedding_site.models import *
@@ -5,6 +7,7 @@ from wedding_site.models import constants
 from wedding_site.forms import AddUserForm, EditNameForm
 from wedding_site.forms import GenderForm, GroupForm
 from wedding_site.forms import DietaryRequirementsForm
+from wedding_site.forms import AddTaskForm
 from wedding_site.utils import admin_required
 
 
@@ -44,6 +47,15 @@ def dashboard():
                            total_not_responded=total_not_responded,
                            total_declined=total_declined,
                            add_user_form=add_user_form)
+
+
+@admin.route('/todos')
+@admin_required
+def todos():
+    todos = Todo.query.all()
+    add_task_form = AddTaskForm()
+    return render_template('todos.html', todos=todos,
+                           add_task_form=add_task_form)
 
 
 @admin.route('/group/<string:group_name>')

@@ -2,7 +2,8 @@
     (url_for('frontend.index'), 'index', 'Home', false, false),
     (url_for('frontend.countdown'), 'countdown', 'Countdown', false, false),
     (url_for('frontend.user'), 'user', 'Me', true, false),
-    (url_for('admin.dashboard'), 'dashboard', 'Dashboard', true, true)
+    (url_for('admin.dashboard'), 'dashboard', 'Dashboard', true, true),
+    (url_for('admin.todos'), 'todos', 'Todos', true, true)
 ] -%}
 
 {% from "utils.html" import render_avatar %}
