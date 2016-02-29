@@ -12,7 +12,6 @@ if os.environ.get('DATABASE_URL') is None:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data.db')
 else:
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
-SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 if ON_HEROKU:
